@@ -1,0 +1,24 @@
+{
+  "name": "uhi67/mdxhelper",
+  "description": "Helper for SimpleSAMLphp mdx config",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "uhi67",
+      "email": "uherkovich.peter@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "uhi67\\mdxhelper\\": "src"
+    }
+  },
+  "require": {
+    "php": "^7.0",
+    "simplesamlphp/simplesamlphp": "^v1.17.0"
+  },
+  "require-dev": {
+    "codeception/codeception": "^4.0"
+  }
+}
