@@ -2,6 +2,7 @@
 namespace uhi67\mdxhelper;
 
 use Exception;
+use SimpleSAML\Logger;
 
 class MdxHelper {
 	/**
@@ -55,13 +56,20 @@ class MdxHelper {
 			$filename = $cacheDir.'/'.preg_replace('~[^\w_.-]+~', '_', parse_url($url, PHP_URL_HOST).'_'.parse_url($url, PHP_URL_PATH).'_'.parse_url($url, PHP_URL_QUERY));
 			if(file_exists($filename) && filemtime($filename)+$cacheTime > time()) {
 				$jsonData = file_get_contents($filename);
+				Logger::info('MdxHelper::loadRemote using cached data.');
 			}
 			else {
-				$jsonData = static::loadRemoteInner($url, function() {
-					return file_exists($filename) ? file_get_contents($filename) : false;
-				}, function($jsonData) use ($filename) {
+				$default = function() use($filename) {
+					if(file_exists($filename)) {
+						Logger::info('MdxHelper::loadRemote fallback using cached data.');
+						return file_get_contents($filename);
+					}
+					return false;
+				};
+				$store = function($jsonData) use ($filename) {
 					file_put_contents($filename, $jsonData);
-				});
+				};
+				$jsonData = static::loadRemoteInner($url, $default, $store);
 			}
 		}
 		else {
@@ -71,6 +79,13 @@ class MdxHelper {
 	}
 
 	/**
+	 * Load (json) data from the given URL.
+	 *
+	 * If data is loaded from remote and $store callable is given, $store is called with the data.
+	 * If loading fails, and $default callable is given, returns result of $default call.
+	 *
+	 * On error, kogs error into SimpleSAMLphp log and returns null.
+	 *
 	 * @param string $url
 	 * @param callable $default -- (string|bool) return the cached value if exists or false if not
 	 * @param callable $store -- (void) store the value into the cache
@@ -80,14 +95,32 @@ class MdxHelper {
 	 */
 	private static function loadRemoteInner($url, $default=null, $store=null) {
 		try {
-			$jsonData = file_get_contents($url);
-			if($jsonData && $store) $store($jsonData);
+			$jsonData = @file_get_contents($url);
+			if($jsonData && $store) {
+				Logger::info('MdxHelper::loadRemote remote data is stored.');
+				$store($jsonData);
+			}
+			$message = 'Url returned no data';
 		}
 		catch(\Throwable $e) {
 			$jsonData = false;
+			$message = $e->getMessage();
 		}
-		if(!$jsonData && (!$default || !($jsonData = $default()))) {
-			throw new \Exception("Error loading data from '$url', ".$e->getMessage());
+		if(!$jsonData) {
+			if($default) {
+				// Loading from original source failed
+				if($default && !is_callable($default)) {
+					// Invalid $default callable
+					Logger::error('MdxHelper::loadRemote default must be a callable or null');
+				}
+				if($default && is_callable($default) && ($jsonData = $default()) && is_array($jsonData)) return $jsonData;
+				// Loading from default value also failed
+				Logger::warning('MdxHelper::loadRemote URL returned no data and default source returned no valid data.');
+			}
+			else {
+				Logger::warning('MdxHelper::loadRemote failed: '.$message);
+			}
+			return '[]';
 		}
 		return $jsonData;
 	}
