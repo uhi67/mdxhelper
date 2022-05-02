@@ -42,7 +42,7 @@ $config = [
 	'baseurlpath' => $baseurlpath,
 	'certdir' => dirname(__DIR__).'/cert/',
 	'metadatadir' => dirname(__DIR__).'/metadata/',
-	'loggingdir' => dirname(__DIR__, 3) .'/runtime/log/',
+	'loggingdir' => dirname(__DIR__, 2) .'/_output/runtime/logs/',
 	'datadir' => $dataDir.'/',
 	'attributenamemapdir' => dirname(__DIR__).'/attributemap/',
 
@@ -141,7 +141,7 @@ $config = [
 	 * Options: [syslog,file,errorlog]
 	 *
 	 */
-	'logging.level' => $env=='development' ? Logger::DEBUG : Logger::INFO,
+	'logging.level' => $env!='production' ? Logger::DEBUG : Logger::ERR,
 	'logging.handler' => 'file',
 
 	/*
