@@ -23,7 +23,4 @@ class UnitTester extends \Codeception\Actor
    /**
     * Define custom actions here
     */
-   public function assertFileContainsLastLine($logFile, $pattern, $message='') {
-	   $this->assertFileExists($logFile, $message);
-   }
 }

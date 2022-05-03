@@ -665,15 +665,15 @@ $config = [
 		],
 		[
 			'type' => 'flatfile',
-			'directory' => dirname(__DIR__, 3) .'/runtime/simplesamlphp/metadata',
+			'directory' => dirname(__DIR__, 2) .'/_output/runtime/simplesaml/metadata',
 		],
 		array_merge([
 			'type' => 'mdx',
 			'server' => 'https://mdx-2020.eduid.hu',
-			'cachedir' => dirname(__DIR__, 3) .'/runtime/simplesaml/mdx-cache',
+			'cachedir' => dirname(__DIR__, 2) .'/_output/runtime/simplesaml/mdx-cache',
 			'cachelength' => 86400,
 			'validateFingerprint' => 'C3:72:DC:75:4C:FA:BA:65:63:52:D9:6B:47:5B:44:7E:AA:F6:45:61',
-		], \uhi67\mdxhelper\MdxHelper::loadRemote('https://rr.pte.hu/eduid-mdx', dirname(__DIR__, 3) .'/runtime/simplesaml/mdxhelper')
+		], \uhi67\mdxhelper\MdxHelper::loadRemote('https://rr.pte.hu/eduid-mdx', dirname(__DIR__, 2) .'/_output/runtime/simplesaml/mdxhelper')
 		),
 	],
 
