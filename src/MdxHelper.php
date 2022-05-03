@@ -6,12 +6,16 @@ use SimpleSAML\Logger;
 
 class MdxHelper {
 	/**
+     * Loads an entity from the configured MDX/MDQ source into a (metadata) array.
+     * For example an idp entity can be loaded into saml20-idp-remote in order to be shown in the local discovery selection.
+     *
+     *
 	 * @param array $metadata -- tha array to load metadata into
-	 * @param string $idp -- entity ID
+	 * @param string $entity -- entity ID
 	 * @return void
 	 * @throws Exception -- if loaded metadata is expired (e.g. the source is unaccessible and cache is expired)
 	 */
-	public static function loadFromMdq(&$metadata, $idp) {
+	public static function loadFromMdq(&$metadata, $entity) {
 		$config = \SimpleSAML\Configuration::getInstance();
 		$sourcesConfig = $config->getArray('metadata.sources', null);
 		$sources = \SimpleSAML\Metadata\MetaDataStorageSource::parseSources($sourcesConfig);
@@ -20,7 +24,7 @@ class MdxHelper {
 		foreach ($sources as $source) {
 			if(!($source instanceof \SimpleSAML\Metadata\Sources\MDQ)) continue;
 			try {
-				$metadataSet = $source->getMetaData($idp, $set);
+				$metadataSet = $source->getMetaData($entity, $set);
 			}
 			catch(Throwable $e) {
 				$metadataSet = null;
@@ -29,7 +33,7 @@ class MdxHelper {
 				if (array_key_exists('expire', $metadataSet)) {
 					if ($metadataSet['expire'] < time()) {
 						throw new \Exception(
-							'Metadata for the entity [' . $idp . '] expired ' .
+							'Metadata for the entity [' . $entity . '] expired ' .
 							(time() - $metadataSet['expire']) . ' seconds ago.'
 						);
 					}
@@ -38,18 +42,24 @@ class MdxHelper {
 			}
 		}
 		if($metadataSet) {
-			$idpMetadata = \SimpleSAML\Configuration::loadFromArray($metadataSet, $set . '/' . var_export($idp, true));
-			$metadata[$idp] = $idpMetadata->toArray();
+			$idpMetadata = \SimpleSAML\Configuration::loadFromArray($metadataSet, $set . '/' . var_export($entity, true));
+			$metadata[$entity] = $idpMetadata->toArray();
 		}
 	}
 
-	/**
-	 * Loads an array from URL in json format, caching
-	 *
-	 * @param string $url -- an URL returning the json data
-	 * @param string $cacheDir --
-	 * @return array
-	 */
+    /**
+     * Loads an array from URL in json format, caching.
+     * If cached data exists and didn't expire, returns the cached data.
+     * If the remote is inaccessible, returns the cached data even if it has expired.
+     * If no cached data, returns [].
+     * Logs errors and infos into SimpleSAMLphp configured log.
+     *
+     * @param string $url -- an URL returning the json data
+     * @param string $cacheDir --
+     * @param float|int $cacheTime
+     * @return array
+     * @throws Exception
+     */
 	public static function loadRemote($url, $cacheDir=null, $cacheTime=24*3600) {
 		if($cacheDir) {
 			if(!is_dir($cacheDir)) mkdir($cacheDir, 0774, true);
@@ -84,14 +94,14 @@ class MdxHelper {
 	 * If data is loaded from remote and $store callable is given, $store is called with the data.
 	 * If loading fails, and $default callable is given, returns result of $default call.
 	 *
-	 * On error, kogs error into SimpleSAMLphp log and returns null.
+	 * On error, logs error into SimpleSAMLphp log and returns null.
 	 *
 	 * @param string $url
 	 * @param callable $default -- (string|bool) return the cached value if exists or false if not
 	 * @param callable $store -- (void) store the value into the cache
 	 *
-	 * @return void
-	 * @throws Exception
+	 * @return array|string
+     * @throws Exception
 	 */
 	private static function loadRemoteInner($url, $default=null, $store=null) {
 		try {
