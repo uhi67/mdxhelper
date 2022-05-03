@@ -1,6 +1,7 @@
 <?php
 namespace unit;
 
+use Codeception\Util\Debug;
 use SAML2\Compat\Ssp\Logger;
 use SimpleSAML\Kernel;
 use SimpleSAML\Module\core\Stats\Output\Log;
@@ -20,12 +21,13 @@ class MdxHelperTest extends \Codeception\Test\Unit
 		putenv('SIMPLESAMLPHP_CONFIG_DIR='.$configDir);
 		$this->assertEquals($configDir, getenv('SIMPLESAMLPHP_CONFIG_DIR'));
 		$config = \SimpleSAML\Configuration::getInstance();
-		$this->assertEquals('', $config->getString('logging.level', 'not set'));
+		$this->assertEquals(\SimpleSAML\Logger::DEBUG, $config->getInteger('logging.level'));
+		$this->assertEquals('simplesamlphp.log', $logFile = $config->getString('logging.logfile'));
 
 		$kernel = new Kernel('main');
 		$logdir = $kernel->getLogDir();
 		if(!is_dir($logdir)) mkdir($logdir, 0774, true);
-		$this->logFile = $logdir . 'simplesamlphp.log'; // $config->getString('loggingdir')
+		$this->logFile = $logdir . $logFile; // $config->getString('loggingdir')
 		\SimpleSAML\Logger::info('MdxHelperTest');
     }
 
