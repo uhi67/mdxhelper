@@ -66,6 +66,10 @@ class MdxHelperTest extends \Codeception\Test\Unit
         $cacheFile = 'rr.pte.hu__eduid-mdx.php_';
         $this->assertFileExists($cacheDir.'/'.$cacheFile);
         $this->assertEquals('{"type":"mdx","server":"https:\/\/mdx-2020.eduid.hu","validateFingerprint":"C3:72:DC:75:4C:FA:BA:65:63:52:D9:6B:47:5B:44:7E:AA:F6:45:61"}', file_get_contents($cacheDir.'/'.$cacheFile));
+
+        // Loading from insecure (invalid https cert) source (logs an error and returns empty array despite the remote contains data)
+        $data = \uhi67\mdxhelper\MdxHelper::loadRemote('https://testidp.pte.hu/eduid-mdx.php');
+        $this->assertEquals([], $data);
     }
 
     public function testLoadFromMdq() {
