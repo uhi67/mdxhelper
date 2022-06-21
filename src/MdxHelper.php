@@ -22,11 +22,11 @@ class MdxHelper {
 		$set = 'saml20-idp-remote';
 		$metadataSet = null;
 		foreach ($sources as $source) {
-			if(!($source instanceof \SimpleSAML\Metadata\Sources\MDQ)) continue;
+			if(!($source instanceof \SimpleSAML\Metadata\Sources\MDQ) && !is_a($source, 'SimpleSAML\Module\pte\MetadataStore\MDQ')) continue;
 			try {
 				$metadataSet = $source->getMetaData($entity, $set);
 			}
-			catch(Throwable $e) {
+			catch(\Throwable $e) {
 				$metadataSet = null;
 			}
 			if ($metadataSet !== null) {

@@ -24,7 +24,7 @@ Using MdxHelper
 		],
         // Default MDX config as last resort. MdxHelper::loadRemote returns empty array on failure. 
 		array_merge([
-                'type' => 'mdx',
+                'type' => 'mdx', // Can also be 'pte:MDQ' if pte-module is loaded
                 'server' => 'https://mdx-2020.eduid.hu',
                 'cachedir' => dirname(__DIR__, 2) .'/_output/runtime/simplesaml/mdx-cache',
                 'cachelength' => 86400,
