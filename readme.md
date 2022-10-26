@@ -1,7 +1,7 @@
 MdxHelper
 =========
 
-version 1.0 -- 2022-05-03
+version 1.1 -- 2022-10-26
 
 A configuration helper for SimpleSAMLphp.
 
@@ -24,7 +24,7 @@ Using MdxHelper
 		],
         // Default MDX config as last resort. MdxHelper::loadRemote returns empty array on failure. 
 		array_merge([
-                'type' => 'mdx',
+                'type' => 'mdx', // Can also be 'pte:MDQ' if pte-module is loaded
                 'server' => 'https://mdx-2020.eduid.hu',
                 'cachedir' => dirname(__DIR__, 2) .'/_output/runtime/simplesaml/mdx-cache',
                 'cachelength' => 86400,
@@ -34,7 +34,6 @@ Using MdxHelper
             \uhi67\mdxhelper\MdxHelper::loadRemote($mdxDataUrl, dirname(__DIR__, 3) .'/runtime/simplesaml/mdxhelper')
 		),
 	],
-
 
 ### Usage example in saml20-idp-remote
 
@@ -49,6 +48,11 @@ Security Warning
 
 Change log
 ==========
+
+## 1.1 -- 2022-10-26
+
+- php 7,8
+- Recognize 'SimpleSAML\Module\pte\MetadataStore\MDQ' metadata source class as well
 
 ## 1.0 -- 2022-05-03
 
