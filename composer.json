@@ -15,10 +15,10 @@
     }
   },
   "require": {
-    "php": "^7.0",
+    "php": ">=7.0",
     "ext-json": "*",
     "ext-openssl": "*",
-    "simplesamlphp/simplesamlphp": "^v1.17.0"
+    "simplesamlphp/simplesamlphp": "^v1.19.5"
   },
   "require-dev": {
     "codeception/codeception": "^4.0",
