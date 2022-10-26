@@ -1,7 +1,7 @@
 MdxHelper
 =========
 
-version 1.0 -- 2022-05-03
+version 1.1 -- 2022-10-26
 
 A configuration helper for SimpleSAMLphp.
 
@@ -49,6 +49,11 @@ Security Warning
 
 Change log
 ==========
+
+## 1.1 -- 2022-10-26
+
+- php 7,8
+- Recognize 'SimpleSAML\Module\pte\MetadataStore\MDQ' metadata source class as well
 
 ## 1.0 -- 2022-05-03
 
