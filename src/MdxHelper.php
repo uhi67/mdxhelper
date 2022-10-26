@@ -2,7 +2,10 @@
 namespace uhi67\mdxhelper;
 
 use Exception;
+use SimpleSAML\Configuration;
 use SimpleSAML\Logger;
+use SimpleSAML\Metadata\MetaDataStorageSource;
+use SimpleSAML\Metadata\Sources\MDQ;
 
 class MdxHelper {
 	/**
@@ -16,23 +19,28 @@ class MdxHelper {
 	 * @throws Exception -- if loaded metadata is expired (e.g. the source is unaccessible and cache is expired)
 	 */
 	public static function loadFromMdq(&$metadata, $entity) {
-		$config = \SimpleSAML\Configuration::getInstance();
+		$config = Configuration::getInstance();
 		$sourcesConfig = $config->getArray('metadata.sources', null);
-		$sources = \SimpleSAML\Metadata\MetaDataStorageSource::parseSources($sourcesConfig);
+		$sources = MetaDataStorageSource::parseSources($sourcesConfig);
 		$set = 'saml20-idp-remote';
 		$metadataSet = null;
 		foreach ($sources as $source) {
-			if(!($source instanceof \SimpleSAML\Metadata\Sources\MDQ) && !is_a($source, 'SimpleSAML\Module\pte\MetadataStore\MDQ')) continue;
+			if(!($source instanceof MDQ) && !is_a($source, 'SimpleSAML\Module\pte\MetadataStore\MDQ')) continue;
 			try {
 				$metadataSet = $source->getMetaData($entity, $set);
-			}
-			catch(\Throwable $e) {
+			} /** @noinspection PhpElementIsNotAvailableInCurrentPhpVersionInspection */
+                /** @noinspection PhpFullyQualifiedNameUsageInspection */
+            catch(\Throwable $e) {
 				$metadataSet = null;
-			}
+			} /** @noinspection PhpWrongCatchClausesOrderInspection */
+                /** @noinspection PhpRedundantCatchClauseInspection */
+            catch(Exception $e) {
+                $metadataSet = null;
+            }
 			if ($metadataSet !== null) {
 				if (array_key_exists('expire', $metadataSet)) {
 					if ($metadataSet['expire'] < time()) {
-						throw new \Exception(
+						throw new Exception(
 							'Metadata for the entity [' . $entity . '] expired ' .
 							(time() - $metadataSet['expire']) . ' seconds ago.'
 						);
@@ -42,7 +50,7 @@ class MdxHelper {
 			}
 		}
 		if($metadataSet) {
-			$idpMetadata = \SimpleSAML\Configuration::loadFromArray($metadataSet, $set . '/' . var_export($entity, true));
+			$idpMetadata = Configuration::loadFromArray($metadataSet, $set . '/' . var_export($entity, true));
 			$metadata[$entity] = $idpMetadata->toArray();
 		}
 	}
@@ -111,19 +119,25 @@ class MdxHelper {
 				$store($jsonData);
 			}
 			$message = 'Url returned no data';
-		}
-		catch(\Throwable $e) {
+		} /** @noinspection PhpElementIsNotAvailableInCurrentPhpVersionInspection */
+            /** @noinspection PhpFullyQualifiedNameUsageInspection */
+        catch(\Throwable $e) {
 			$jsonData = false;
 			$message = $e->getMessage();
-		}
+		} /** @noinspection PhpWrongCatchClausesOrderInspection */
+            /** @noinspection PhpRedundantCatchClauseInspection */
+        catch(Exception $e) {
+            $jsonData = false;
+            $message = $e->getMessage();
+        }
 		if(!$jsonData) {
 			if($default) {
 				// Loading from original source failed
-				if($default && !is_callable($default)) {
+				if(!is_callable($default)) {
 					// Invalid $default callable
 					Logger::error('MdxHelper::loadRemote default must be a callable or null');
 				}
-				if($default && is_callable($default) && ($jsonData = $default()) && is_array($jsonData)) return $jsonData;
+				if(is_callable($default) && ($jsonData = $default()) && is_array($jsonData)) return $jsonData;
 				// Loading from default value also failed
 				Logger::warning('MdxHelper::loadRemote URL returned no data and default source returned no valid data.');
 			}

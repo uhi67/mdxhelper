@@ -1,4 +1,4 @@
-<?php /** @noinspection HttpUrlsUsage */
+<?php
 /*
  * The configuration of SimpleSAMLphp
  *
