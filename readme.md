@@ -35,7 +35,6 @@ Using MdxHelper
 		),
 	],
 
-
 ### Usage example in saml20-idp-remote
 
     // Load IdP entity from mdq and add to $metadata array
